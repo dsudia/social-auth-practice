@@ -10,9 +10,8 @@ var swig = require('swig');
 var flash = require('connect-flash');
 var session = require('express-session');
 var Promise = require('bluebird');
-var passport = require('./lib/auth');
-var knex = require('../../db/knex');
 var cookieSession = require('cookie-session');
+var passport = require('./lib/passport');
 
 
 // *** routes *** //
@@ -39,12 +38,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cookieSession({
-  name: 'change_me',
-  keys: [process.env.KEY1, process.env.KEY2, process.env.KEY3]
+  name: 'linkedin-oauth-session-example',
+  keys: ['B4B52555-DF15-4455-8DF0-3B5433B9D872', '62B4AAB9-A7D9-4740-82D0-203AF990587B', '705D11E4-3BBB-475A-8BBE-3EE040A3750E']
 }));
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(session({
-  secret: process.env.SECRET_KEY || 'change_me',
+  secret: 'A85AE5A8-E8D2-4EA2-8CB9-C89575C7AEB5',
   resave: false,
   saveUninitialized: true
 }));
@@ -52,19 +51,6 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// *** configure passport *** //
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-  knex('users').where('id', id)
-    .then(function(data) {
-      return done(null, data[0]);
-    }).catch(function(err) {
-      return done(err, null);
-    });
-});
 
 // *** main routes *** //
 app.use('/', routes);
