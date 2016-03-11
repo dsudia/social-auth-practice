@@ -29,18 +29,37 @@ passport.use(new LinkedInStrategy({
   state: true,
   scope: ['r_emailaddress', 'r_basicprofile']
   }, function(accessToken, refreshToken, profile, done) {
-    process.nextTick(function () {
-      return done(null, profile);
-    });
+    var id = profile.id;
+    var firstName = profile.name.givenName;
+    var lastName = profile.name.familyName;
+    var email = profile.emails[0].value;
+    var photo = profile.photos[0].value;
+    knex('users').where('linkedin_id', id)
+      .then(function (user) {
+        if (user[0] === undefined) {
+          return knex('users').insert({linkedin_id: id, email: email, preferred_name: firstName, last_name: lastName, avatar_url: photo})
+          .then(function() {
+            return knex('users').select('*').where('linkedin_id', id)
+            .then(function(user) {
+              return user[0].id;
+            });
+          });
+        }
+        else {
+          return user[0].id;
+        }
+      }).then(function (userID) {
+        return done(null, userID);
+      });
 }));
 
 // *** configure passport *** //
-passport.serializeUser(function(user, done) {
-  done(null, user);
+passport.serializeUser(function(userID, done) {
+  done(null, userID);
 });
 
-passport.deserializeUser(function(user, done) {
-  done(null, user);
+passport.deserializeUser(function(userID, done) {
+  done(null, userID);
 });
 
 module.exports = passport;

@@ -20,7 +20,6 @@ router.get('/linkedin', passport.authenticate('linkedin'));
 
 router.get('/linkedin/callback', passport.authenticate('linkedin', {failureRedirect: '/'}),
  function(req, res, next) {
-   console.log('user:', req.user);
    res.redirect('/');
 });
 
